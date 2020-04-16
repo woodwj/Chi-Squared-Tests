@@ -15,7 +15,7 @@ LGREY = (140,140,140)
 bgColour = WHITE
 bgText = GREY
 bgHoverText = LGREY
-fColour = BLACK
+fColour = bdrColour = BLACK
 
 # GUI Settings
 g_scale = 0.5
@@ -27,3 +27,6 @@ s_FPS = 120
 s_title = "Chi-Squared Calculator and Hypothesis Testing"
 s_tileSize = 48
 s_font = pg.font.SysFont('arial', 25)
+
+# events #
+e_DOUBLECLICK = pg.USEREVENT + 1
