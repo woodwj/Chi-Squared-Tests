@@ -2,7 +2,7 @@ import pygame as pg
 import pathlib
 import math
 import settings
-import textbox
+import textWidgets
 import utils
 pg.init()
 vec = pg.math.Vector2
@@ -23,7 +23,11 @@ class programScene:
         
     # start/restart a scene #  
     def initScene(self):
-        textbox.textbox(self, (10,10),(200,100), "hello world")
+        self.state.mousePos = vec(pg.mouse.get_pos())
+        self.state.mousePressed = pg.mouse.get_pressed()
+        textWidgets.textbox(self, (10,10),(200,100), "hello world")
+        textWidgets.button(self, (400,300),(200,100), "press me")
+        textWidgets.inputbox(self, (200,450),(200,100), q= "Table Width?: ")
 
     # events each gameloop #
     def events(self):
@@ -39,22 +43,44 @@ class programScene:
                     self.programLoop = False
             # mouseclick #
             if event.type == pg.MOUSEBUTTONDOWN:
-                #double click?#
+                #double click #
                 if self.state.dcClock.tick() < self.state.dcTime:
-                    for sprite in self.objects.groupAll:
-                        if sprite.textRect.collidepoint(event.pos):
+                    for sprite in self.objects.groupTextBoxes:
+                        if sprite.textRect.collidepoint(event.pos) and not sprite.textLocked:
                             sprite.editText = True
                             sprite.text = ""
+                    for sprite in self.objects.groupInputBoxes:
+                        if sprite.textRect.collidepoint(event.pos) and not sprite.textLocked:
+                            sprite.editText = True
+                            sprite.answer = ""
+
+                # single click #
+                if event.button == 1:
+                    for sprite in self.objects.groupButtons:
+                        if sprite.hover:
+                            sprite.buttonFunc()
             
+
             if event.type == pg.KEYDOWN:
-                for sprite in self.objects.groupAll:
+                for sprite in self.objects.groupTextBoxes:
                     if sprite.editText:
                         if event.key == pg.K_RETURN:
                             sprite.editText = False
                         elif event.key == pg.K_BACKSPACE:
                             sprite.text = sprite.text[:-1]
+                        elif event.key == pg.K_DELETE:
+                            sprite.kill()
                         else:
                             sprite.text += event.unicode
+                
+                for sprite in self.objects.groupInputBoxes:
+                    if sprite.editText:
+                        if event.key == pg.K_RETURN:
+                            sprite.editText = False
+                        elif event.key == pg.K_BACKSPACE:
+                            sprite.answer = sprite.answer[:-1]
+                        else:
+                            sprite.answer += event.unicode
                 
 
     # draw backround -> sprites -> text #
@@ -78,7 +104,11 @@ class programScene:
 # structure to hold sprites #
 class programObjects:
     def __init__(self):
+        self.groupButtons = pg.sprite.Group()
+        self.groupTextBoxes = pg.sprite.Group()
+        self.groupInputBoxes = pg.sprite.Group()
         self.groupAll = pg.sprite.Group()
+        
         
 # structure to hold constants #
 class programState:
